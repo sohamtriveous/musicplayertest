@@ -39,9 +39,6 @@
         android:text="@string/activity_main_ff"
         android:id="@+id/activity_main_ff" />
 
-    <SeekBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/activity_main_seekbar" />
+
 
 </LinearLayout>

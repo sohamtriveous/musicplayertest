@@ -1,5 +1,6 @@
 package com.triveous.musicplayer;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,43 +20,50 @@ import android.widget.Toast;
 public class MainActivity extends ActionBarActivity {
     // refresh interval in milliseconds
     public static final int INTERVAL_REFRESH = 500;
-    // rewind/ff seek value
-    public static final int VALUE_SEEK = 1000;
 
-    private boolean shouldLog = true;
-
-    private Button mPlayButton;
-    private Button mPauseButton;
-    private TextView mStatusTextView;
+    private ImageView mPlayButton;
     private View mRewindButton;
     private View mFFButton;
     private MusicHandler mMusicHandler = new MusicHandler(Looper.getMainLooper());
 
-    private MediaPlayer mMediaPlayer;
-
     private SeekBar mSeekbar;
 
-    private void logMessage(String message) {
-        if (shouldLog) {
-            Log.d("MainActivity", message);
-        }
+    private void startPlayback() {
+        Intent intent = new Intent(this, MusicService.class);
+        intent.putExtra(MusicService.EXTRA_METHOD, MusicService.METHOD_PLAY);
+        startService(intent);
+    }
+
+    private void fastForward() {
+        Intent intent = new Intent(this, MusicService.class);
+        intent.putExtra(MusicService.EXTRA_METHOD, MusicService.METHOD_FF);
+        startService(intent);
+    }
+
+    private void rewind() {
+        Intent intent = new Intent(this, MusicService.class);
+        intent.putExtra(MusicService.EXTRA_METHOD, MusicService.METHOD_REWIND);
+        startService(intent);
+    }
+
+    private void seekTo(int position) {
+        Intent intent = new Intent(this, MusicService.class);
+        intent.putExtra(MusicService.EXTRA_METHOD, MusicService.METHOD_SEEK);
+        intent.putExtra(MusicService.EXTRA_SEEK_POSITION, position);
+        startService(intent);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_music);
 
-        mMediaPlayer = MediaPlayer.create(this, R.raw.music);
+        mPlayButton = (ImageView) findViewById(R.id.activity_music_play);
 
-        mPlayButton = (Button) findViewById(R.id.activity_main_play);
-        mPauseButton = (Button) findViewById(R.id.activity_main_pause);
-        mStatusTextView = (TextView) findViewById(R.id.activity_main_status);
+        mRewindButton = findViewById(R.id.activity_music_rewind);
+        mFFButton = findViewById(R.id.activity_music_ff);
 
-        mRewindButton = findViewById(R.id.activity_main_rewind);
-        mFFButton = findViewById(R.id.activity_main_ff);
-
-        mSeekbar = (SeekBar) findViewById(R.id.activity_main_seekbar);
+        mSeekbar = (SeekBar) findViewById(R.id.activity_music_seekbar);
 
         setOnClickListeners();
         setOnCompletionListener();
@@ -68,36 +77,23 @@ public class MainActivity extends ActionBarActivity {
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, getString(R.string.activity_main_playing), Toast.LENGTH_SHORT).show();
-                // start playing music
-                mMediaPlayer.start();
-                // initialize the seekbar
-                mSeekbar.setMax(mMediaPlayer.getDuration());
-                // start updating the seekbar
+                startPlayback();
                 mMusicHandler.sendEmptyMessage(MusicHandler.MESSAGE_UPDATE_SEEKBAR);
-            }
-        });
-
-        mPauseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, getString(R.string.activity_main_pause), Toast.LENGTH_SHORT).show();
-                mMediaPlayer.pause();
-                mMusicHandler.removeMessages(MusicHandler.MESSAGE_UPDATE_SEEKBAR);
+                Toast.makeText(MainActivity.this, getString(R.string.activity_main_playing), Toast.LENGTH_SHORT).show();
             }
         });
 
         mRewindButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mMediaPlayer.seekTo(mMediaPlayer.getCurrentPosition() - VALUE_SEEK);
+                rewind();
             }
         });
 
         mFFButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mMediaPlayer.seekTo(mMediaPlayer.getCurrentPosition() - VALUE_SEEK);
+                fastForward();
             }
         });
     }
@@ -106,15 +102,6 @@ public class MainActivity extends ActionBarActivity {
      * Update handler, seekbar once the media has finished playback
      */
     private void setOnCompletionListener() {
-        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                Toast.makeText(MainActivity.this, getString(R.string.activity_main_finished), Toast.LENGTH_SHORT)
-                        .show();
-                mSeekbar.setProgress(0);
-                mMusicHandler.removeMessages(MusicHandler.MESSAGE_UPDATE_SEEKBAR);
-            }
-        });
     }
 
     /**
@@ -125,7 +112,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    mMediaPlayer.seekTo(progress);
+                    seekTo(progress);
                 }
             }
 
@@ -162,9 +149,9 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MESSAGE_UPDATE_SEEKBAR) {
-                if (mMediaPlayer.isPlaying()) {
+                if (MusicService.isPlaying()) {
                     // update seekbar
-                    mSeekbar.setProgress(mMediaPlayer.getCurrentPosition());
+                    mSeekbar.setProgress(MusicService.getPosition());
                     // schedule the next message
                     sendEmptyMessageDelayed(MESSAGE_UPDATE_SEEKBAR, INTERVAL_REFRESH);
                 }

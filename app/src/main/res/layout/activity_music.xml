@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin">
+
+    <ImageView
+        android:id="@+id/activity_music_albumart"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/linkin" />
+
+    <TextView
+        android:id="@+id/activity_music_song"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="In The End"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/activity_music_albumart"
+        android:textSize="20sp"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/activity_music_artist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Linkin Park"
+        android:textSize="40sp"
+        android:gravity="center_horizontal"
+        android:layout_below="@+id/activity_music_song" />
+
+    <SeekBar
+        android:id="@+id/activity_music_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/activity_music_artist" />
+
+    <ImageView
+        android:id="@+id/activity_music_play"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_play_arrow_black_48dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/activity_music_seekbar" />
+
+    <ImageView
+        android:id="@+id/activity_music_rewind"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_fast_rewind_black_48dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/activity_music_seekbar" />
+
+    <ImageView
+        android:id="@+id/activity_music_ff"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_fast_forward_black_48dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/activity_music_seekbar" />
+
+
+</RelativeLayout>
